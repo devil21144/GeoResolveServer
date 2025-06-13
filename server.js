@@ -6,7 +6,7 @@ const db = require("./database");
 const app = express();
 const nodemailer = require("nodemailer");
 const transport = nodemailer.createTransport({
-  host: "gmail",
+  service: "gmail",
   auth: {
     user: "mihirvelaga21144@gmail.com",
     pass: "uhve eoca sagb itfw",
