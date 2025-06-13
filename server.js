@@ -121,7 +121,33 @@ GeoResolve Team`,
     });
   }
 });
-
+app.post("/otp", async (req, res) => {
+  try {
+    const otp = req.body.otp;
+    const username = req.body.username;
+    const results = await db.query(
+      "select * from assigntable where username=lower($1)",
+      [username]
+    );
+    const resultsRows = results.rows[0];
+    const otpdb = results.rows[0].otp;
+    if (otp === otpdb) {
+      await db.query('insert into lower($1) values(lower($2),$3,lower($4),$5,$6,$7,$8)', [resultsRows.tableassign, resultsRows.username, resultsRows.password, resultsRows.email, resultsRows.phoneno, resultsRows.age, resultsRows.district, resultsRows.village]);
+      await db.query('delete otp from assigntable where username=lower($1)', [req.body.username]);
+      res.status(200).send({
+        message: "login successful",
+        status: "ok",
+      });
+    }
+  } catch (err) {
+    const message = err.message || "Internal Server Error";
+    const status = err.statusCode || 500;
+    res.status(status).send({
+      message: message,
+      status: "error",
+    });
+  }
+});
 app.listen(port, () => {
   console.log(`Server up and listening on ${port}`);
 });
