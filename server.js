@@ -129,7 +129,6 @@ app.post("/otp", async (req, res) => {
       "select * from assigntable where username=lower($1)",
       [username]
     );
-    console.log(otpdb);
     const resultsRows = results.rows[0];
     const otpdb = results.rows[0].otp;
     if (otp === otpdb) {
