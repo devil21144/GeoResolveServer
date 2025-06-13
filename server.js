@@ -67,7 +67,7 @@ GeoResolve Team`,
     });
   }
 });
-app.post("/register/citizen", async (req, res) => {
+app.post("/register/authority", async (req, res) => {
   const number = Math.floor(Math.random() * 999999) + 100000;
   const password = req.body.password;
   const saltRounds = 10;
