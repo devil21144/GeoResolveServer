@@ -124,6 +124,7 @@ GeoResolve Team`,
 app.post("/otp", async (req, res) => {
   try {
     const otp = req.body.otp;
+    console.log(req.body);
     const username = req.body.username;
     const results = await db.query(
       "select * from assigntable where username=lower($1)",
