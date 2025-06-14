@@ -144,6 +144,7 @@ app.post("/otp", async (req, res) => {
   } catch (err) {
     const message = err.message || "Internal Server Error";
     const status = err.statusCode || 500;
+    console.log(err);
     res.status(status).send({
       message: message,
       status: "error",
