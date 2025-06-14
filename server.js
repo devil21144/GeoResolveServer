@@ -32,7 +32,7 @@ app.post("/register/citizen", async (req, res) => {
       const err = new Error("User already exists");
       throw err;
     }
-      await db.query(
+    await db.query(
       "insert into assigntable values(lower($1),$2,lower($3),$4,$5,$6,$7)",
       [
         req.body.username,
@@ -83,9 +83,22 @@ app.post("/register/authority", async (req, res) => {
   const hashed = await bcrypt.hash(password, salt);
   console.log(req.body);
   try {
-    const results = await db.query('SELECT * FROM authority WHERE username=lower($1)', [req.body.username]);
+    const results = await db.query(
+      "SELECT * FROM authority WHERE username=lower($1)",
+      [req.body.username]
+    );
     if (results.rows.length === 1) {
       const err = new Error("User already exists");
+      throw err;
+    }
+    const results1 = await db.query(
+      "SELECT * FROM authorityaccept WHERE username=lower($1)",
+      [req.body.username]
+    );
+    if (results1.rows.length === 1) {
+      const err = new Error(
+        "User already in registration\nPlease wait until Admin accepts"
+      );
       throw err;
     }
     await db.query(
@@ -177,8 +190,7 @@ app.post("/otp", async (req, res) => {
         message: "login successful",
         status: "ok",
       });
-    }
-    else {
+    } else {
       const err = new Error("Wrong OTP");
       throw err;
     }
