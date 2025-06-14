@@ -124,7 +124,6 @@ GeoResolve Team`,
 app.post("/otp", async (req, res) => {
   try {
     const otp = req.body.otp;
-    console.log(req.body);
     const username = req.body.username;
     const results = await db.query(
       "select * from assigntable where username=lower($1)",
@@ -132,10 +131,35 @@ app.post("/otp", async (req, res) => {
     );
     const resultsRows = results.rows[0];
     const otpdb = results.rows[0].otp;
-    console.log(`OTP: ${otp}\nOTPDB: ${otpdb}`);
     if (otp === otpdb) {
-      await db.query('insert into lower($1) values(lower($2),$3,lower($4),$5,$6,$7,$8)', [resultsRows.tableassign, resultsRows.username, resultsRows.password, resultsRows.email, resultsRows.phoneno, resultsRows.age, resultsRows.district, resultsRows.village]);
-      await db.query('delete otp from assigntable where username=lower($1)', [req.body.username]);
+      if (resultsRows.tableassign === "authority") {
+        await db.query(
+          "insert into authorityaccept values (lower($1),$2,lower($3),$4,$5,$6,$7)",
+          [
+            resultsRows.username,
+            resultsRows.password,
+            resultsRows.email,
+            resultsRows.phoneno,
+            resultsRows.age,
+            resultsRows.district,
+            resultsRows.village,
+          ]
+        );
+      } else {
+        await db.query(
+          `insert into ${resultsRows.tableassign} values(lower($1),$2,lower($3),$4,$5)`,
+          [
+            resultsRows.username,
+            resultsRows.password,
+            resultsRows.email,
+            resultsRows.phoneno,
+            resultsRows.age,
+          ]
+        );
+      }
+      await db.query("delete from assigntable where username=lower($1)", [
+        req.body.username,
+      ]);
       res.status(200).send({
         message: "login successful",
         status: "ok",
@@ -144,7 +168,6 @@ app.post("/otp", async (req, res) => {
   } catch (err) {
     const message = err.message || "Internal Server Error";
     const status = err.statusCode || 500;
-    console.log(err);
     res.status(status).send({
       message: message,
       status: "error",
