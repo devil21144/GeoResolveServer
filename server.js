@@ -165,6 +165,10 @@ app.post("/otp", async (req, res) => {
         status: "ok",
       });
     }
+    else {
+      const err = new Error("Wrong OTP");
+      throw err;
+    }
   } catch (err) {
     const message = err.message || "Internal Server Error";
     const status = err.statusCode || 500;
