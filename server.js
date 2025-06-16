@@ -156,6 +156,7 @@ app.post("/otp", async (req, res) => {
       [username]
     );
     const resultsRows = results.rows[0];
+    console.log(results.rows);
     const otpdb = results.rows[0].otp;
     if (otp === otpdb) {
       if (resultsRows.tableassign === "authority") {
@@ -180,7 +181,7 @@ app.post("/otp", async (req, res) => {
             resultsRows.email,
             resultsRows.phoneno,
             resultsRows.age,
-          ]
+          ] 
         );
       }
       await db.query("delete from assigntable where username=lower($1)", [
@@ -201,6 +202,7 @@ app.post("/otp", async (req, res) => {
       message: message,
       status: "error",
     });
+    console.log(err);
   }
 });
 app.listen(port, () => {
