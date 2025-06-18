@@ -245,6 +245,7 @@ app.post("/login/citizen", async (req, res) => {
       "select * from citizen where username=lower($1)",
       [req.body.username]
     );
+    console.log(results);
     if (results.rows.length === 0) {
       const error = new Error("No User Found");
       throw error;
