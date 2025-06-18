@@ -19,7 +19,7 @@ const port = process.env.PORT;
 app.post("/register/citizen", async (req, res) => {
   const number = Math.floor(Math.random() * 999999) + 100000;
   const password = req.body.password;
-  const saltRounds = 10;
+  const saltRounds = 12;
   const salt = await bcrypt.genSalt(saltRounds);
   const hashed = await bcrypt.hash(password, salt);
   console.log(req.body);
@@ -78,7 +78,7 @@ GeoResolve Team`,
 app.post("/register/authority", async (req, res) => {
   const number = Math.floor(Math.random() * 999999) + 100000;
   const password = req.body.password;
-  const saltRounds = 10;
+  const saltRounds = 12;
   const salt = await bcrypt.genSalt(saltRounds);
   const hashed = await bcrypt.hash(password, salt);
   console.log(req.body);
@@ -161,7 +161,7 @@ app.post("/otp", async (req, res) => {
     if (otp === otpdb) {
       if (resultsRows.tableassign === "authority") {
         await db.query(
-          "insert into authorityaccept values (lower($1),$2,lower($3),$4,$5,$6,$7)",
+          "insert into authorityaccept(username,password,email,phoneno,age,district,village,role) values (lower($1),$2,lower($3),$4,$5,$6,$7,$8)",
           [
             resultsRows.username,
             resultsRows.password,
@@ -170,6 +170,7 @@ app.post("/otp", async (req, res) => {
             resultsRows.age,
             resultsRows.district,
             resultsRows.village,
+            resultsRows.role,
           ]
         );
       } else {
@@ -181,7 +182,7 @@ app.post("/otp", async (req, res) => {
             resultsRows.email,
             resultsRows.phoneno,
             resultsRows.age,
-          ] 
+          ]
         );
       }
       await db.query("delete from assigntable where username=lower($1)", [
@@ -203,6 +204,105 @@ app.post("/otp", async (req, res) => {
       status: "error",
     });
     console.log(err);
+  }
+});
+app.post("/login/admin", async (req, res) => {
+  try {
+    const results = await db.query(
+      "SELECT * from admin where username=lower($1)",
+      [req.body.username]
+    );
+    if (results.rows.length === 0) {
+      const error = new Error("No User Found");
+      throw error;
+    }
+    const check = await bcrypt.compare(
+      req.body.password,
+      results.rows[0].password
+    );
+    if (check === true) {
+      res.status(200).send({
+        status: "successful",
+        message: "Login Successful",
+      });
+    } else {
+      const error = new Error("Wrong Password");
+      throw error;
+    }
+  } catch (err) {
+    console.log(err);
+    const message = err.message || "Internal Server Error";
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).send({
+      status: "error",
+      message: message,
+    });
+  }
+});
+app.post("/login/citizen", async (req, res) => {
+  try {
+    const results = await db.query(
+      "select * from citizen where username=lower($1)",
+      [req.body.username]
+    );
+    if (results.rows.length === 0) {
+      const error = new Error("No User Found");
+      throw error;
+    }
+    const check = await bcrypt.compare(
+      req.body.password,
+      results.rows[0].password
+    );
+    if (check === true) {
+      res.status(200).send({
+        status: "successful",
+        message: "Login Successful",
+      });
+    } else {
+      const error = new Error("Wrong Password");
+      throw error;
+    }
+  } catch (err) {
+    const message = err.message || "Internal Server Error";
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).send({
+      message: message,
+      status: "error",
+    });
+    console.log(err);
+  }
+});
+app.post("/login/authority", async (req, res) => {
+  try {
+    const results = await db.query(
+      "select * from authority where username=lower($1)",
+      [req.body.username]
+    );
+    if (results.rows.length === 0) {
+      const err = new Error("No User Found");
+      throw err;
+    }
+    const check = await bcrypt.compare(
+      req.body.password,
+      results.rows[0].password
+    );
+    if (check) {
+      res.status(200).send({
+        status: "success",
+        message: "login successful",
+      });
+    } else {
+      const err = new Error("Wrong Password");
+      throw err;
+    }
+  } catch (err) {
+    console.log(err);
+    const message = err.message || "Internal Server Error";
+    const statusCode = err.statusCode || 500;
+    res.status(statusCode).send({
+      message: message,
+      status: "error",
+    });
   }
 });
 app.listen(port, () => {
