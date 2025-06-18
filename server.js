@@ -253,6 +253,7 @@ app.post("/login/citizen", async (req, res) => {
       req.body.password,
       results.rows[0].password
     );
+    console.log(check);
     if (check === true) {
       res.status(200).send({
         status: "successful",
